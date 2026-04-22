@@ -37,10 +37,12 @@
                             <a class="btn btn-outline-secondary" href="/documents/<?= e((string) $row['id']) ?>/pdf">PDF</a>
                         <?php endif; ?>
                         <a class="btn btn-outline-primary" href="/<?= e($entity) ?>/<?= e((string) $row['id']) ?>/edit">Изменить</a>
-                        <form method="post" action="/<?= e($entity) ?>/<?= e((string) $row['id']) ?>/delete" onsubmit="return confirm('Удалить запись?')">
-                            <?= Security::csrfField() ?>
-                            <button class="btn btn-outline-danger" type="submit">Удалить</button>
-                        </form>
+                        <?php if (has_role('admin')): ?>
+                            <form method="post" action="/<?= e($entity) ?>/<?= e((string) $row['id']) ?>/delete" onsubmit="return confirm('Удалить запись?')">
+                                <?= Security::csrfField() ?>
+                                <button class="btn btn-outline-danger" type="submit">Удалить</button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </td>
             </tr>

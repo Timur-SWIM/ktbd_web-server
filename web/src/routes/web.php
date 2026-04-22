@@ -20,13 +20,15 @@ $router->post('/register', [AuthController::class, 'register']);
 $router->post('/logout', [AuthController::class, 'logout'], ['auth' => true]);
 
 foreach (EntityConfig::all() as $entity => $config) {
-    $options = ['auth' => true, 'roles' => $config['roles'], 'params' => ['entity' => $entity]];
+    $options = ['auth' => true, 'params' => ['entity' => $entity]];
+    $adminOptions = ['auth' => true, 'roles' => ['admin'], 'params' => ['entity' => $entity]];
+
     $router->get('/' . $entity, [CrudController::class, 'index'], $options);
     $router->get('/' . $entity . '/create', [CrudController::class, 'create'], $options);
     $router->post('/' . $entity, [CrudController::class, 'store'], $options);
     $router->get('/' . $entity . '/{id}/edit', [CrudController::class, 'edit'], $options);
     $router->post('/' . $entity . '/{id}', [CrudController::class, 'update'], $options);
-    $router->post('/' . $entity . '/{id}/delete', [CrudController::class, 'delete'], $options);
+    $router->post('/' . $entity . '/{id}/delete', [CrudController::class, 'delete'], $adminOptions);
 }
 
 $router->get('/reports/{entity}', [ReportController::class, 'entity'], ['auth' => true]);

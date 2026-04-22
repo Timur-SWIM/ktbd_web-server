@@ -130,6 +130,12 @@ final class CrudController extends BaseController
             return;
         }
 
+        if (!has_role('admin')) {
+            http_response_code(403);
+            echo 'Удаление доступно только администратору.';
+            return;
+        }
+
         $this->repository->delete($entity, (int) $id);
         flash('success', 'Запись удалена.');
         $this->redirect('/' . $entity);

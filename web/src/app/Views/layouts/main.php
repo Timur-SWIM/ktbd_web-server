@@ -36,18 +36,10 @@ $pageTitle = $title ?? $app['name'];
                 Панель
             </a>
                 <?php foreach (EntityConfig::all() as $entityName => $entityConfig): ?>
-                    <?php
-                    $visible = false;
-                    foreach ($entityConfig['roles'] as $role) {
-                        $visible = $visible || has_role($role);
-                    }
-                    ?>
-                    <?php if ($visible): ?>
-                        <a class="sidebar-link <?= str_starts_with($currentPath, '/' . $entityName) ? 'active' : '' ?>" href="/<?= e($entityName) ?>">
-                            <span class="sidebar-link-dot"></span>
-                            <?= e($entityConfig['title']) ?>
-                        </a>
-                    <?php endif; ?>
+                    <a class="sidebar-link <?= str_starts_with($currentPath, '/' . $entityName) ? 'active' : '' ?>" href="/<?= e($entityName) ?>">
+                        <span class="sidebar-link-dot"></span>
+                        <?= e($entityConfig['title']) ?>
+                    </a>
                 <?php endforeach; ?>
         </nav>
     </aside>
