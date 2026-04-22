@@ -51,6 +51,13 @@ final class AuthController extends BaseController
             return;
         }
 
+        if (!$repository->isActiveUserId((int) $user['id'])) {
+            $repository->deleteAccount((int) $user['id']);
+            flash('error', 'Учетная запись удалена или заблокирована.');
+            $this->redirect('/login');
+            return;
+        }
+
         session_regenerate_id(true);
         $_SESSION['user'] = [
             'id' => (int) $user['id'],

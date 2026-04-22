@@ -31,6 +31,29 @@ final class UserRepository
         return array_map(static fn (array $row): string => $row['code'], $rows);
     }
 
+    public function isActiveUserId(int $userId): bool
+    {
+        return (int) $this->db->scalar(
+            'SELECT COUNT(*)
+             FROM users u
+             WHERE u.id = :id
+               AND u.status = :status
+               AND (
+                   EXISTS (
+                       SELECT 1
+                       FROM user_roles ur INNER JOIN roles r ON r.id = ur.role_id
+                       WHERE ur.user_id = u.id AND r.code = :admin_role
+                   )
+                   OR EXISTS (
+                       SELECT 1
+                       FROM staff s
+                       WHERE s.created_by = u.id AND s.full_name = u.full_name
+                   )
+               )',
+            ['id' => $userId, 'status' => 'active', 'admin_role' => 'admin']
+        ) > 0;
+    }
+
     public function usernameExists(string $username): bool
     {
         return (int) $this->db->scalar(
@@ -56,6 +79,31 @@ final class UserRepository
         } catch (Throwable $exception) {
             oci_rollback($connection);
             throw new RuntimeException('Failed to create user registration.', 0, $exception);
+        }
+    }
+
+    public function deleteAccount(int $userId): void
+    {
+        $connection = Database::connection();
+
+        try {
+            foreach (['staff', 'tools', 'elements', 'documents', 'devices'] as $table) {
+                $this->executeInTransaction(
+                    $connection,
+                    "UPDATE {$table} SET created_by = NULL WHERE created_by = :user_id",
+                    ['user_id' => $userId]
+                );
+            }
+
+            $this->executeInTransaction($connection, 'DELETE FROM users WHERE id = :user_id', ['user_id' => $userId]);
+
+            if (!oci_commit($connection)) {
+                $error = oci_error($connection);
+                throw new RuntimeException($error['message'] ?? 'Failed to commit user deletion.');
+            }
+        } catch (Throwable $exception) {
+            oci_rollback($connection);
+            throw new RuntimeException('Failed to delete user account.', 0, $exception);
         }
     }
 
@@ -119,6 +167,28 @@ final class UserRepository
         if (!oci_execute($statement, OCI_NO_AUTO_COMMIT)) {
             $error = oci_error($statement);
             throw new RuntimeException($error['message'] ?? 'Failed to insert staff profile.');
+        }
+
+        oci_free_statement($statement);
+    }
+
+    private function executeInTransaction(mixed $connection, string $sql, array $params): void
+    {
+        $statement = oci_parse($connection, $sql);
+        if (!$statement) {
+            $error = oci_error($connection);
+            throw new RuntimeException($error['message'] ?? 'Failed to parse SQL.');
+        }
+
+        $bound = [];
+        foreach ($params as $key => $value) {
+            $bound[$key] = $value;
+            oci_bind_by_name($statement, ':' . $key, $bound[$key]);
+        }
+
+        if (!oci_execute($statement, OCI_NO_AUTO_COMMIT)) {
+            $error = oci_error($statement);
+            throw new RuntimeException($error['message'] ?? 'SQL execution failed.');
         }
 
         oci_free_statement($statement);

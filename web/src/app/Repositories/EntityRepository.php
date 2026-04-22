@@ -6,6 +6,8 @@ namespace App\Repositories;
 
 use App\Services\EntityConfig;
 use InvalidArgumentException;
+use RuntimeException;
+use Throwable;
 
 final class EntityRepository
 {
@@ -81,6 +83,13 @@ final class EntityRepository
     public function delete(string $entity, int $id): void
     {
         $config = $this->config($entity);
+
+        if ($entity === 'staff') {
+            $this->deleteStaff($id);
+            return;
+        }
+
+        $this->deleteEntityRelations($entity, $id);
         $this->db->execute("DELETE FROM {$config['table']} WHERE id = :id", ['id' => $id]);
     }
 
@@ -188,5 +197,113 @@ final class EntityRepository
             $placeholders = implode(', ', array_map(static fn (string $field): string => ':' . $field, array_keys($params)));
             $this->db->execute("INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})", $params);
         }
+    }
+
+    private function deleteStaff(int $id): void
+    {
+        $staff = $this->db->fetchOne(
+            'SELECT s.id, s.full_name, s.created_by, u.full_name AS user_full_name,
+                    (SELECT COUNT(*)
+                     FROM user_roles ur INNER JOIN roles r ON r.id = ur.role_id
+                     WHERE ur.user_id = u.id AND r.code = :admin_role) AS admin_roles
+             FROM staff s LEFT JOIN users u ON u.id = s.created_by
+             WHERE s.id = :id',
+            ['id' => $id, 'admin_role' => 'admin']
+        );
+
+        if ($staff === null) {
+            return;
+        }
+
+        $linkedUserId = $this->linkedUserIdForStaff($staff);
+        $connection = Database::connection();
+
+        try {
+            $this->executeInTransaction($connection, 'UPDATE documents SET staff_id = NULL WHERE staff_id = :id', ['id' => $id]);
+            $this->executeInTransaction($connection, 'DELETE FROM staff WHERE id = :id', ['id' => $id]);
+
+            if ($linkedUserId !== null) {
+                $this->deleteUserAccountInTransaction($connection, $linkedUserId);
+            }
+
+            if (!oci_commit($connection)) {
+                $error = oci_error($connection);
+                throw new RuntimeException($error['message'] ?? 'Failed to commit staff deletion.');
+            }
+        } catch (Throwable $exception) {
+            oci_rollback($connection);
+            throw new RuntimeException('Failed to delete staff record.', 0, $exception);
+        }
+    }
+
+    private function linkedUserIdForStaff(array $staff): ?int
+    {
+        $createdBy = (int) ($staff['created_by'] ?? 0);
+        if ($createdBy <= 0) {
+            return null;
+        }
+
+        if ((int) ($staff['admin_roles'] ?? 0) > 0) {
+            return null;
+        }
+
+        if ((string) ($staff['full_name'] ?? '') !== (string) ($staff['user_full_name'] ?? '')) {
+            return null;
+        }
+
+        return $createdBy;
+    }
+
+    private function deleteUserAccountInTransaction(mixed $connection, int $userId): void
+    {
+        foreach (['staff', 'tools', 'elements', 'documents', 'devices'] as $table) {
+            $this->executeInTransaction(
+                $connection,
+                "UPDATE {$table} SET created_by = NULL WHERE created_by = :user_id",
+                ['user_id' => $userId]
+            );
+        }
+
+        $this->executeInTransaction($connection, 'DELETE FROM users WHERE id = :user_id', ['user_id' => $userId]);
+    }
+
+    private function deleteEntityRelations(string $entity, int $id): void
+    {
+        match ($entity) {
+            'tools' => $this->db->execute('DELETE FROM device_tools WHERE tool_id = :id', ['id' => $id]),
+            'elements' => $this->db->execute('DELETE FROM device_elements WHERE element_id = :id', ['id' => $id]),
+            'documents' => $this->db->execute('DELETE FROM device_documents WHERE document_id = :id', ['id' => $id]),
+            'devices' => $this->deleteDeviceRelations($id),
+            default => null,
+        };
+    }
+
+    private function deleteDeviceRelations(int $id): void
+    {
+        $this->db->execute('DELETE FROM device_tools WHERE device_id = :id', ['id' => $id]);
+        $this->db->execute('DELETE FROM device_elements WHERE device_id = :id', ['id' => $id]);
+        $this->db->execute('DELETE FROM device_documents WHERE device_id = :id', ['id' => $id]);
+    }
+
+    private function executeInTransaction(mixed $connection, string $sql, array $params): void
+    {
+        $statement = oci_parse($connection, $sql);
+        if (!$statement) {
+            $error = oci_error($connection);
+            throw new RuntimeException($error['message'] ?? 'Failed to parse SQL.');
+        }
+
+        $bound = [];
+        foreach ($params as $key => $value) {
+            $bound[$key] = $value;
+            oci_bind_by_name($statement, ':' . $key, $bound[$key]);
+        }
+
+        if (!oci_execute($statement, OCI_NO_AUTO_COMMIT)) {
+            $error = oci_error($statement);
+            throw new RuntimeException($error['message'] ?? 'SQL execution failed.');
+        }
+
+        oci_free_statement($statement);
     }
 }
