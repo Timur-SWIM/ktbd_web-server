@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.2-apache-bookworm
 
 ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_21_13
 ENV ORACLE_HOME=/opt/oracle/instantclient_21_13
