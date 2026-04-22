@@ -1,0 +1,16 @@
+{
+  "name": "electronics/crm-asu-tp",
+  "description": "MVP CRM/ASU TP for electronics production",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "ext-oci8": "*",
+    "ext-pdo_oci": "*",
+    "tecnickcom/tcpdf": "^6.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}

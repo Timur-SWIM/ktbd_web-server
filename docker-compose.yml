@@ -1,0 +1,38 @@
+services:
+  oracle:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: electronics_oracle
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_SYS_PASSWORD:-oracle}
+      APP_USER: ${ORACLE_APP_USER:-electronics_app}
+      APP_USER_PASSWORD: ${ORACLE_APP_PASSWORD:-electronics_app_password}
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./database/sql:/container-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: electronics_web
+    env_file:
+      - .env
+    ports:
+      - "8090:80"
+    volumes:
+      - ./web/src:/var/www/html
+    depends_on:
+      oracle:
+        condition: service_healthy
+    command: ["/usr/local/bin/app-entrypoint.sh"]
+
+volumes:
+  oracle-data:

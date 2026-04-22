@@ -1,0 +1,6 @@
+.env
+web/src/vendor/
+web/src/storage/logs/*.log
+web/src/storage/pdf/*.pdf
+web/src/storage/tmp/*
+.DS_Store

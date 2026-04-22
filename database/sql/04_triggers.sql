@@ -1,0 +1,131 @@
+WHENEVER SQLERROR EXIT SQL.SQLCODE;
+
+CONNECT electronics_app/electronics_app_password@//oracle:1521/XEPDB1;
+
+CREATE OR REPLACE TRIGGER trg_roles_biu
+BEFORE INSERT OR UPDATE ON roles
+FOR EACH ROW
+BEGIN
+  IF INSERTING AND :NEW.id IS NULL THEN
+    SELECT seq_roles.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+  IF INSERTING AND :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+  :NEW.updated_at := SYSTIMESTAMP;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_users_biu
+BEFORE INSERT OR UPDATE ON users
+FOR EACH ROW
+BEGIN
+  IF INSERTING AND :NEW.id IS NULL THEN
+    SELECT seq_users.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+  IF INSERTING AND :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+  :NEW.updated_at := SYSTIMESTAMP;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_staff_biu
+BEFORE INSERT OR UPDATE ON staff
+FOR EACH ROW
+BEGIN
+  IF INSERTING AND :NEW.id IS NULL THEN
+    SELECT seq_staff.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+  IF INSERTING AND :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+  :NEW.updated_at := SYSTIMESTAMP;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_tools_biu
+BEFORE INSERT OR UPDATE ON tools
+FOR EACH ROW
+BEGIN
+  IF INSERTING AND :NEW.id IS NULL THEN
+    SELECT seq_tools.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+  IF INSERTING AND :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+  :NEW.updated_at := SYSTIMESTAMP;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_elements_biu
+BEFORE INSERT OR UPDATE ON elements
+FOR EACH ROW
+BEGIN
+  IF INSERTING AND :NEW.id IS NULL THEN
+    SELECT seq_elements.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+  IF INSERTING AND :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+  :NEW.updated_at := SYSTIMESTAMP;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_documents_biu
+BEFORE INSERT OR UPDATE ON documents
+FOR EACH ROW
+BEGIN
+  IF INSERTING AND :NEW.id IS NULL THEN
+    SELECT seq_documents.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+  IF INSERTING AND :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+  :NEW.updated_at := SYSTIMESTAMP;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_devices_biu
+BEFORE INSERT OR UPDATE ON devices
+FOR EACH ROW
+BEGIN
+  IF INSERTING AND :NEW.id IS NULL THEN
+    SELECT seq_devices.NEXTVAL INTO :NEW.id FROM dual;
+  END IF;
+  IF INSERTING AND :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+  :NEW.updated_at := SYSTIMESTAMP;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_device_tools_bi
+BEFORE INSERT ON device_tools
+FOR EACH ROW
+BEGIN
+  IF :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_device_elements_bi
+BEFORE INSERT ON device_elements
+FOR EACH ROW
+BEGIN
+  IF :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_device_documents_bi
+BEFORE INSERT ON device_documents
+FOR EACH ROW
+BEGIN
+  IF :NEW.created_at IS NULL THEN
+    :NEW.created_at := SYSTIMESTAMP;
+  END IF;
+END;
+/

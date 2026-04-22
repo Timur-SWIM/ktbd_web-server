@@ -1,0 +1,119 @@
+:root {
+    --app-bg: #f5f7fb;
+    --app-primary: #1d5fbf;
+    --app-ink: #18212f;
+    --app-muted: #637083;
+    --app-border: #d9e0ec;
+}
+
+body {
+    background: var(--app-bg);
+    color: var(--app-ink);
+}
+
+.bg-primary {
+    background-color: var(--app-primary) !important;
+}
+
+.auth-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px;
+    background: linear-gradient(135deg, #eef4ff 0%, #f9fbff 50%, #eef7f1 100%);
+}
+
+.login-panel {
+    width: min(100%, 440px);
+    background: #fff;
+    border: 1px solid var(--app-border);
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: 0 16px 48px rgba(24, 33, 47, 0.12);
+}
+
+.auth-shell .alert {
+    width: min(100%, 440px);
+}
+
+.login-hint {
+    margin-top: 18px;
+    padding: 12px;
+    background: #f2f6ff;
+    border-radius: 6px;
+    color: var(--app-muted);
+    font-size: 0.92rem;
+}
+
+.page-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.page-heading h1 {
+    margin: 0;
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.page-heading p {
+    margin: 6px 0 0;
+    color: var(--app-muted);
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.metric-card,
+.table-shell,
+.form-shell {
+    background: #fff;
+    border: 1px solid var(--app-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(24, 33, 47, 0.06);
+}
+
+.metric-card {
+    padding: 20px;
+}
+
+.metric-card span,
+.metric-card small {
+    display: block;
+    color: var(--app-muted);
+}
+
+.metric-card strong {
+    display: block;
+    margin: 8px 0;
+    font-size: 2.3rem;
+    line-height: 1;
+}
+
+.table-shell,
+.form-shell {
+    padding: 18px;
+}
+
+.btn-group form {
+    display: inline-flex;
+}
+
+@media (max-width: 768px) {
+    .page-heading {
+        flex-direction: column;
+    }
+
+    .login-panel {
+        padding: 24px;
+    }
+}
