@@ -1,9 +1,12 @@
 <?php use App\Helpers\Security; ?>
 
 <div class="login-panel">
-    <div class="mb-4">
-        <h1 class="h3 mb-2">CRM / АСУ ТП</h1>
-        <p class="text-secondary mb-0">Вход в систему производственного участка</p>
+    <div class="login-brand">
+        <img class="login-logo" src="<?= e(asset('img/logo-color-no-bg.png')) ?>" alt="Логотип МГТУ">
+        <div>
+            <h1>CRM / АСУ ТП</h1>
+            <p>Вход в систему производственного участка</p>
+        </div>
     </div>
 
     <form method="post" action="/login" class="vstack gap-3">
