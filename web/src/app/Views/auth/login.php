@@ -2,7 +2,6 @@
 
 <div class="login-panel">
     <div class="login-brand">
-        <img class="login-logo" src="<?= e(asset('img/logo-color-no-bg.png')) ?>" alt="Логотип МГТУ">
         <div>
             <h1>CRM / АСУ ТП</h1>
             <p>Вход в систему производственного участка</p>

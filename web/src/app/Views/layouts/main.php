@@ -26,7 +26,7 @@ $pageTitle = $title ?? $app['name'];
             <img class="brand-logo" src="<?= e(asset('img/logo-color-no-bg.png')) ?>" alt="Логотип МГТУ">
             <span>
                 <strong>АСУ ТП</strong>
-                <small>CRM контур участка</small>
+                <small>управляй своей фирмой</small>
             </span>
         </a>
 
@@ -55,7 +55,6 @@ $pageTitle = $title ?? $app['name'];
     <div class="app-workspace">
         <header class="app-header">
             <div class="header-brand">
-                <img class="header-logo" src="<?= e(asset('img/logo-color-no-bg.png')) ?>" alt="Логотип МГТУ">
                 <div>
                     <span>Рабочее пространство</span>
                     <strong><?= e($pageTitle) ?></strong>
