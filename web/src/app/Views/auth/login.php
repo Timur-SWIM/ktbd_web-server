@@ -24,4 +24,8 @@
     <div class="login-hint">
         Демо-доступ: <strong>admin</strong> / <strong>password</strong>
     </div>
+
+    <div class="auth-switch">
+        Нет доступа? <a href="/register">Зарегистрироваться</a>
+    </div>
 </div>

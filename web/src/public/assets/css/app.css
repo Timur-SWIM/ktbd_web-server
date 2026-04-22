@@ -272,6 +272,10 @@ a {
     box-shadow: var(--app-shadow);
 }
 
+.auth-panel-wide {
+    width: min(100%, 720px);
+}
+
 .login-brand {
     display: flex;
     align-items: center;
@@ -291,7 +295,7 @@ a {
 }
 
 .auth-shell .alert {
-    width: min(100%, 452px);
+    width: min(100%, 720px);
 }
 
 .auth-footer {
@@ -306,6 +310,18 @@ a {
     border: 1px solid #dce9fb;
     border-radius: 6px;
     font-size: 0.92rem;
+}
+
+.auth-switch {
+    margin-top: 18px;
+    color: var(--app-muted);
+    font-size: 0.94rem;
+    text-align: center;
+}
+
+.auth-switch a {
+    color: var(--app-primary);
+    font-weight: 700;
 }
 
 .page-heading {
