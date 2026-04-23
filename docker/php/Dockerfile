@@ -1,7 +1,6 @@
 FROM php:8.2-apache-bookworm
 
 ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_21_13
-ENV ORACLE_HOME=/opt/oracle/instantclient_21_13
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -23,9 +22,9 @@ RUN mkdir -p /opt/oracle \
     && echo /opt/oracle/instantclient_21_13 > /etc/ld.so.conf.d/oracle-instantclient.conf \
     && ldconfig
 
-RUN docker-php-ext-configure pdo_oci --with-pdo-oci=instantclient,/opt/oracle/instantclient_21_13,21.13 \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install pdo pdo_oci \
+RUN docker-php-ext-install zip \
+    && docker-php-ext-configure pdo_oci --with-pdo-oci=instantclient,/opt/oracle/instantclient_21_13,21.13 \
+    && docker-php-ext-install pdo_oci \
     && echo "instantclient,/opt/oracle/instantclient_21_13" | pecl install oci8 \
     && docker-php-ext-enable oci8
 
