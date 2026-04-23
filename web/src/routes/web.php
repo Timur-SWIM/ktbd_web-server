@@ -26,6 +26,9 @@ foreach (EntityConfig::all() as $entity => $config) {
     $router->get('/' . $entity, [CrudController::class, 'index'], $options);
     $router->get('/' . $entity . '/create', [CrudController::class, 'create'], $options);
     $router->post('/' . $entity, [CrudController::class, 'store'], $options);
+    if (isset($config['import'])) {
+        $router->post('/' . $entity . '/import', [CrudController::class, 'import'], $options);
+    }
     $router->get('/' . $entity . '/{id}/edit', [CrudController::class, 'edit'], $options);
     $router->post('/' . $entity . '/{id}', [CrudController::class, 'update'], $options);
     $router->post('/' . $entity . '/{id}/delete', [CrudController::class, 'delete'], $adminOptions);

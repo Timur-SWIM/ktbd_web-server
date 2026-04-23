@@ -1,0 +1,4 @@
+name;part_number;element_type;quantity;unit;status
+Конденсатор 100 нФ 0603;C-100N-0603;Пассивный компонент;2500;pcs;active
+Разъем USB-C 16 pin;USB-C-16P;Разъем;180;pcs;reserved
+Светодиод зеленый 0805;LED-GREEN-0805;Индикация;900;pcs;active

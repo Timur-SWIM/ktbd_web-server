@@ -1,0 +1,3 @@
+name;part_number;element_type;quantity;unit;status
+Диод Шоттки SS14;SS14-IMP;Полупроводник;300;pcs;active
+Диод Шоттки SS14 дубль;SS14-IMP;Полупроводник;120;pcs;active

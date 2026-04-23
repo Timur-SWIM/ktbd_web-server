@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Repositories\EntityRepository;
+use App\Services\EntityImportService;
+use RuntimeException;
 
 final class CrudController extends BaseController
 {
@@ -65,6 +67,58 @@ final class CrudController extends BaseController
 
         $this->repository->create($entity, $_POST, (int) current_user()['id']);
         flash('success', 'Запись создана.');
+        $this->redirect('/' . $entity);
+    }
+
+    public function import(string $entity): void
+    {
+        if (!$this->requirePostWithCsrf()) {
+            return;
+        }
+
+        $config = $this->repository->config($entity);
+        if (!isset($config['import'])) {
+            http_response_code(404);
+            echo 'Импорт для раздела недоступен.';
+            return;
+        }
+
+        $importer = new EntityImportService($this->repository);
+        try {
+            $result = $importer->parse($entity, $_FILES['import_file'] ?? null);
+        } catch (RuntimeException $exception) {
+            $this->render('crud/import_result', [
+                'title' => 'Импорт: ' . $config['title'],
+                'entity' => $entity,
+                'config' => $config,
+                'errors' => [['line' => null, 'message' => 'Не удалось проверить файл: ' . $exception->getMessage()]],
+            ], 500);
+            return;
+        }
+
+        if ($result['errors'] !== []) {
+            $this->render('crud/import_result', [
+                'title' => 'Импорт: ' . $config['title'],
+                'entity' => $entity,
+                'config' => $config,
+                'errors' => $result['errors'],
+            ], 422);
+            return;
+        }
+
+        try {
+            $created = $this->repository->createMany($entity, $result['rows'], (int) current_user()['id']);
+        } catch (RuntimeException $exception) {
+            $this->render('crud/import_result', [
+                'title' => 'Импорт: ' . $config['title'],
+                'entity' => $entity,
+                'config' => $config,
+                'errors' => [['line' => null, 'message' => 'Не удалось сохранить данные: ' . $exception->getMessage()]],
+            ], 500);
+            return;
+        }
+
+        flash('success', 'Импорт завершен. Добавлено записей: ' . $created . '.');
         $this->redirect('/' . $entity);
     }
 

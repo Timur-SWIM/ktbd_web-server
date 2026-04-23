@@ -6,6 +6,7 @@ ENV ORACLE_HOME=/opt/oracle/instantclient_21_13
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libaio1 \
+        libzip-dev \
         unzip \
         wget \
         git \
@@ -23,6 +24,7 @@ RUN mkdir -p /opt/oracle \
     && ldconfig
 
 RUN docker-php-ext-configure pdo_oci --with-pdo-oci=instantclient,/opt/oracle/instantclient_21_13,21.13 \
+    && docker-php-ext-install zip \
     && docker-php-ext-install pdo pdo_oci \
     && echo "instantclient,/opt/oracle/instantclient_21_13" | pecl install oci8 \
     && docker-php-ext-enable oci8

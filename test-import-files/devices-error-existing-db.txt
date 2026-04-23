@@ -1,0 +1,2 @@
+name;serial_number;model;production_status;status
+Контроллер питания дубль;DEV-2026-0001;PWR-CTRL-A1;assembly;active

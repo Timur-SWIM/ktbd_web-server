@@ -14,6 +14,7 @@ final class EntityConfig
                 'singular' => 'Оборудование',
                 'table' => 'tools',
                 'roles' => ['engineer'],
+                'import' => ['unique' => 'inventory_number'],
                 'list' => ['id', 'name', 'inventory_number', 'tool_type', 'location', 'status'],
                 'fields' => [
                     'name' => ['label' => 'Наименование', 'required' => true],
@@ -51,6 +52,7 @@ final class EntityConfig
                 'singular' => 'Элемент',
                 'table' => 'elements',
                 'roles' => ['technologist'],
+                'import' => ['unique' => 'part_number'],
                 'list' => ['id', 'name', 'part_number', 'element_type', 'quantity', 'unit', 'status'],
                 'fields' => [
                     'name' => ['label' => 'Наименование', 'required' => true],
@@ -90,6 +92,7 @@ final class EntityConfig
                 'singular' => 'Изделие',
                 'table' => 'devices',
                 'roles' => ['engineer'],
+                'import' => ['unique' => 'serial_number'],
                 'list' => ['id', 'name', 'serial_number', 'model', 'production_status', 'status'],
                 'fields' => [
                     'name' => ['label' => 'Наименование', 'required' => true],

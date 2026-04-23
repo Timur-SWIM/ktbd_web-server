@@ -65,6 +65,89 @@ final class EntityRepository
         return $id;
     }
 
+    public function createMany(string $entity, array $rows, int $userId): int
+    {
+        if ($rows === []) {
+            return 0;
+        }
+
+        $config = $this->config($entity);
+        $fields = $this->databaseFields($config);
+        $connection = Database::connection();
+        $created = 0;
+
+        try {
+            foreach ($rows as $row) {
+                $data = $this->only($row, $fields);
+                $data['created_by'] = $userId;
+
+                $columns = implode(', ', array_keys($data));
+                $placeholders = implode(', ', array_map(static fn (string $field): string => ':' . $field, array_keys($data)));
+                $statement = oci_parse($connection, "INSERT INTO {$config['table']} ({$columns}) VALUES ({$placeholders})");
+                if (!$statement) {
+                    $error = oci_error($connection);
+                    throw new RuntimeException($error['message'] ?? 'Failed to parse SQL.');
+                }
+
+                $bound = [];
+                foreach ($data as $key => $value) {
+                    $bound[$key] = $value;
+                    oci_bind_by_name($statement, ':' . $key, $bound[$key]);
+                }
+
+                if (!oci_execute($statement, OCI_NO_AUTO_COMMIT)) {
+                    $error = oci_error($statement);
+                    throw new RuntimeException($error['message'] ?? 'SQL execution failed.');
+                }
+
+                oci_free_statement($statement);
+                $created++;
+            }
+
+            if (!oci_commit($connection)) {
+                $error = oci_error($connection);
+                throw new RuntimeException($error['message'] ?? 'Failed to commit imported records.');
+            }
+        } catch (Throwable $exception) {
+            oci_rollback($connection);
+            throw new RuntimeException('Failed to import records.', 0, $exception);
+        }
+
+        return $created;
+    }
+
+    public function existingValues(string $entity, string $field, array $values): array
+    {
+        $config = $this->config($entity);
+        if (!in_array($field, $this->databaseFields($config), true)) {
+            throw new InvalidArgumentException('Unknown field: ' . $field);
+        }
+
+        $values = array_values(array_unique(array_filter(array_map(
+            static fn (mixed $value): string => trim((string) $value),
+            $values
+        ), static fn (string $value): bool => $value !== '')));
+
+        if ($values === []) {
+            return [];
+        }
+
+        $params = [];
+        $placeholders = [];
+        foreach ($values as $index => $value) {
+            $key = 'value_' . $index;
+            $params[$key] = $value;
+            $placeholders[] = ':' . $key;
+        }
+
+        $rows = $this->db->fetchAll(
+            "SELECT {$field} AS value FROM {$config['table']} WHERE {$field} IN (" . implode(', ', $placeholders) . ')',
+            $params
+        );
+
+        return array_map(static fn (array $row): string => (string) $row['value'], $rows);
+    }
+
     public function update(string $entity, int $id, array $input): void
     {
         $config = $this->config($entity);
